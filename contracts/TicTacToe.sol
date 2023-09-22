@@ -5,7 +5,7 @@ import { console } from "hardhat/console.sol";
 
 contract TicTacToe {
     uint[] private board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    uint[3][8] private rows;
+    uint[3][8] private winningTiles;
     uint private numTurns;
 
     address payable private _player1;
@@ -15,14 +15,14 @@ contract TicTacToe {
     mapping(address playerAddress => uint amount) public balances;
 
     constructor() {
-        rows[0] = [1, 2, 3];
-        rows[1] = [4, 5, 6];
-        rows[2] = [7, 8, 9];
-        rows[3] = [1, 4, 7];
-        rows[4] = [2, 5, 8];
-        rows[5] = [3, 6, 9];
-        rows[6] = [1, 5, 9];
-        rows[7] = [3, 5, 7];
+        winningTiles[0] = [1, 2, 3];
+        winningTiles[1] = [4, 5, 6];
+        winningTiles[2] = [7, 8, 9];
+        winningTiles[3] = [1, 4, 7];
+        winningTiles[4] = [2, 5, 8];
+        winningTiles[5] = [3, 6, 9];
+        winningTiles[6] = [1, 5, 9];
+        winningTiles[7] = [3, 5, 7];
     }
 
     modifier isPlayer() {
@@ -71,10 +71,12 @@ contract TicTacToe {
     }
 
     function checkWinner() public view returns (bool) {
+        uint[] memory checkBoard = board;
+        uint[3][8] memory checkWinnningTiles = winningTiles;
         for (uint i = 0; i < 8; i++) {
-            uint x = board[rows[i][0] - 1];
-            uint y = board[rows[i][1] - 1];
-            uint z = board[rows[i][2] - 1];
+            uint x = checkBoard[checkWinnningTiles[i][0] - 1];
+            uint y = checkBoard[checkWinnningTiles[i][1] - 1];
+            uint z = checkBoard[checkWinnningTiles[i][2] - 1];
             if (x == 0) {
                 continue;
             }
@@ -128,15 +130,15 @@ contract TicTacToe {
         return balances[_player1] + balances[_player2];
     }
 
-    function seeBoard() public view returns (uint[] memory) {
+    function getBoard() public view returns (uint[] memory) {
         return board;
     }
 
-    function seeRows() public view returns (uint[3][8] memory) {
-        return rows;
+    function getWinningTiles() public view returns (uint[3][8] memory) {
+        return winningTiles;
     }
 
-    function seePlayers() public view returns (address[] memory) {
+    function getPlayers() public view returns (address[] memory) {
         address[] memory playerAddresses = new address[](2);
         playerAddresses[0] = _player1;
         playerAddresses[1] = _player2;
@@ -147,7 +149,7 @@ contract TicTacToe {
         return numTurns;
     }
 
-    function seeCurrentPlayer() public view returns (address) {
+    function getCurrentPlayer() public view returns (address) {
         return _currentPlayer;
     }
 }
