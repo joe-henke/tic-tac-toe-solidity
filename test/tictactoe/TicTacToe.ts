@@ -3,12 +3,9 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-
-
 import type { Signers } from "../tictactoeTypes";
 import { deployTicTacToeFixture } from "./TicTacToe.fixture";
-import { BOARD, MOVE1, WINNING_SQUARES, ZERO_ADDRESS } from "./TicTacToeConstants";
-
+import { BOARD, MOVE1, MOVE2, MOVE3, MOVE4, WINNING_SQUARES, ZERO_ADDRESS } from "./TicTacToeConstants";
 
 function deployContract() {
   before(async function () {
@@ -96,5 +93,40 @@ describe("TicTacToe Movement", function () {
   it("should keep a running total or turns", async function () {
     await this.tictactoe.startGame();
     await this.tictactoe.connect(this.signers.player1).move(0);
+    await this.tictactoe.connect(this.signers.player2).move(1);
+    await this.tictactoe.connect(this.signers.player1).move(2);
+    await this.tictactoe.connect(this.signers.player2).move(3);
+    expect(await this.tictactoe.getNumberOfTurns()).to.equal("5");
+  });
+  it("should update the board with each move", async function () {
+    await this.tictactoe.startGame();
+    await this.tictactoe.connect(this.signers.player1).move(0);
+    expect((await this.tictactoe.getBoard()).toString()).to.equal(MOVE1);
+    await this.tictactoe.connect(this.signers.player2).move(1);
+    expect((await this.tictactoe.getBoard()).toString()).to.equal(MOVE2);
+    await this.tictactoe.connect(this.signers.player1).move(2);
+    expect((await this.tictactoe.getBoard()).toString()).to.equal(MOVE3);
+    await this.tictactoe.connect(this.signers.player2).move(3);
+    expect((await this.tictactoe.getBoard()).toString()).to.equal(MOVE4);
   });
 });
+
+describe("TicTacToe Winning and Tie", function () {
+  deployContract();
+  it("should end game and transfer funds on winning move", async function () {
+    await this.tictactoe.startGame();
+    await this.tictactoe.connect(this.signers.player1).deposit({ value: ethers.parseEther("1") });
+    await this.tictactoe.connect(this.signers.player2).deposit({ value: ethers.parseEther("1") });
+    await this.tictactoe.connect(this.signers.player1).move(0);
+    await this.tictactoe.connect(this.signers.player2).move(1);
+    await this.tictactoe.connect(this.signers.player1).move(2);
+    await this.tictactoe.connect(this.signers.player2).move(3);
+    await this.tictactoe.connect(this.signers.player1).move(4);
+    await this.tictactoe.connect(this.signers.player2).move(5);
+    await this.tictactoe.connect(this.signers.player1).move(6);
+    // expect(await this.tictactoe.connect(this.signers.player1).getBalance()).to.equal("2");
+    expect((await this.tictactoe.getBoard()).toString()).to.equal(BOARD);
+  });
+});
+
+// [0, 1, 2, 3, 5, 4, 6, 8, 7].forEach(async (tile) => {

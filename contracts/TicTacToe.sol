@@ -122,6 +122,8 @@ contract TicTacToe {
         delete balances[_player2];
     }
 
+    // getters
+
     function getBalance() public view returns (uint) {
         return address(this).balance / 1000000000000000000;
     }
@@ -138,6 +140,9 @@ contract TicTacToe {
         return winningTiles;
     }
 
+    /**
+     * @notice getter to return a array containing both players for testing
+     */
     function getPlayers() public view returns (address[] memory) {
         address[] memory playerAddresses = new address[](2);
         playerAddresses[0] = _player1;
@@ -145,10 +150,16 @@ contract TicTacToe {
         return playerAddresses;
     }
 
-    function seeNumTurns() public view returns (uint) {
+    /**
+     * @notice getter to return number of turns that have elapsed
+     */
+    function getNumberOfTurns() public view returns (uint) {
         return numTurns;
     }
 
+    /**
+     * @notice getter to return current player for testing purposes
+     */
     function getCurrentPlayer() public view returns (address) {
         return _currentPlayer;
     }
