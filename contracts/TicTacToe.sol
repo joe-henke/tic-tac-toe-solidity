@@ -5,7 +5,6 @@ import { console } from "hardhat/console.sol";
 
 contract TicTacToe {
     uint[] private board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    uint[3][8] private winningTiles;
     uint private numTurns;
 
     address payable private _player1;
@@ -13,17 +12,6 @@ contract TicTacToe {
     address payable private _currentPlayer;
 
     mapping(address playerAddress => uint amount) public balances;
-
-    constructor() {
-        winningTiles[0] = [1, 2, 3];
-        winningTiles[1] = [4, 5, 6];
-        winningTiles[2] = [7, 8, 9];
-        winningTiles[3] = [1, 4, 7];
-        winningTiles[4] = [2, 5, 8];
-        winningTiles[5] = [3, 6, 9];
-        winningTiles[6] = [1, 5, 9];
-        winningTiles[7] = [3, 5, 7];
-    }
 
     modifier isPlayer() {
         require((msg.sender == _player1 || msg.sender == _player2), "not a player in this game");
@@ -71,18 +59,30 @@ contract TicTacToe {
     }
 
     function checkWinner() public view returns (bool) {
-        uint[] memory checkBoard = board;
-        uint[3][8] memory checkWinnningTiles = winningTiles;
-        for (uint i = 0; i < 8; i++) {
-            uint x = checkBoard[checkWinnningTiles[i][0] - 1];
-            uint y = checkBoard[checkWinnningTiles[i][1] - 1];
-            uint z = checkBoard[checkWinnningTiles[i][2] - 1];
-            if (x == 0) {
+        // check rows ---- board indexes [0, 1, 2], [3, 4, 5], [6, 7, 8]
+        for (uint i = 0; i <= 6; i += 3) {
+            if (board[i] == 0) {
                 continue;
             }
-            if (x == y && y == z) {
+            if (board[i] == board[i + 1] && board[i] == board[i + 2]) {
                 return true;
             }
+        }
+        // check columns ---- board indexes [0, 3, 6], [1, 4, 7], [2, 5, 8]
+        for (uint i = 0; i <= 3; i++) {
+            if (board[i] == 0) {
+                continue;
+            }
+            if (board[i] == board[i + 3] && board[i] == board[i + 6]) {
+                return true;
+            }
+        }
+        // check diagonals ---- board indexes [0, 4, 8], [2, 4, 6]
+        if (board[0] != 0 && board[0] == board[4] && board[0] == board[8]) {
+            return true;
+        }
+        if (board[2] != 0 && board[2] == board[4] && board[2] == board[6]) {
+            return true;
         }
         return false;
     }
@@ -134,10 +134,6 @@ contract TicTacToe {
 
     function getBoard() public view returns (uint[] memory) {
         return board;
-    }
-
-    function getWinningTiles() public view returns (uint[3][8] memory) {
-        return winningTiles;
     }
 
     /**

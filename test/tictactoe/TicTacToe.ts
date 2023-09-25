@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import type { Signers } from "../tictactoeTypes";
 import { deployTicTacToeFixture } from "./TicTacToe.fixture";
-import { BOARD, MOVE1, MOVE2, MOVE3, MOVE4, WINNING_SQUARES, ZERO_ADDRESS } from "./TicTacToeConstants";
+import { BOARD, MOVE1, MOVE2, MOVE3, MOVE4, ZERO_ADDRESS } from "./TicTacToeConstants";
 
 function deployContract() {
   before(async function () {
@@ -26,12 +26,6 @@ describe("TicTacToe Initialization", function () {
   deployContract();
   it("should initialize the board", async function () {
     expect((await this.tictactoe.getBoard()).toString()).to.equal(BOARD);
-  });
-  it("should initialize rows with winning combinations", async function () {
-    const rows = await this.tictactoe.getWinningTiles();
-    rows.forEach((row, index) => {
-      expect(row.toString()).to.equal(WINNING_SQUARES[index]);
-    });
   });
   it("should assign first connecting address to player1", async function () {
     const addr1 = (await this.tictactoe.getPlayers())[0];
@@ -123,8 +117,16 @@ describe("TicTacToe Winning and Tie", function () {
     await this.tictactoe.connect(this.signers.player2).move(3);
     await this.tictactoe.connect(this.signers.player1).move(4);
     await this.tictactoe.connect(this.signers.player2).move(5);
+    expect((await this.tictactoe.getBalance()).toString()).to.equal("2");
     await this.tictactoe.connect(this.signers.player1).move(6);
-    // expect(await this.tictactoe.connect(this.signers.player1).getBalance()).to.equal("2");
+    expect((await this.tictactoe.getBalance()).toString()).to.equal("0");
+    // console.log("--------------");
+    // console.log(await ethers.provider.getBalance(this.signers.player1));
+    // console.log(await ethers.provider.getBalance(this.signers.player2));
+    // console.log("p1", (await this.tictactoe.getBalance(this.signers.player1)).toString());
+    // console.log("p2", (await this.tictactoe.getBalance(this.signers.player2)).toString());
+    // console.log((await this.tictactoe.getBalance(this.signers.player2)).toString());
+    // console.log("--------------");
     expect((await this.tictactoe.getBoard()).toString()).to.equal(BOARD);
   });
 });
