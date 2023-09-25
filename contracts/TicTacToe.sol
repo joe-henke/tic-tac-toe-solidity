@@ -4,7 +4,7 @@ pragma solidity >=0.8.4;
 import { console } from "hardhat/console.sol";
 
 contract TicTacToe {
-    uint[] private board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    uint[9] private board;
     uint private numTurns;
 
     address payable private _player1;
@@ -132,7 +132,7 @@ contract TicTacToe {
         return balances[_player1] + balances[_player2];
     }
 
-    function getBoard() public view returns (uint[] memory) {
+    function getBoard() public view returns (uint[9] memory) {
         return board;
     }
 
