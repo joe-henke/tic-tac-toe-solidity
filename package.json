@@ -78,7 +78,6 @@
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain"
   },
   "dependencies": {
-    "@openzeppelin/test-helpers": "^0.5.16",
-    "hardhat-exposed": "^0.3.12"
+    "@openzeppelin/test-helpers": "^0.5.16"
   }
 }
