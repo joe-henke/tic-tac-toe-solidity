@@ -2,6 +2,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@openzeppelin/test-helpers";
 import { config as dotenvConfig } from "dotenv";
 import "hardhat-deploy";
+import "hardhat-exposed";
 import type { HardhatUserConfig } from "hardhat/config";
 import type { NetworkUserConfig } from "hardhat/types";
 import { resolve } from "path";

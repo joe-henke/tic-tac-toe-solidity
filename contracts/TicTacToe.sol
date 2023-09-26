@@ -15,6 +15,7 @@ contract TicTacToe {
 
     event GameState(uint[9], uint, address);
     event GameBoard(uint[9]);
+    event CurrentPlayer(address);
 
     modifier isPlayer() {
         require((msg.sender == _player1 || msg.sender == _player2), "please join game if there's an available space");
@@ -92,6 +93,7 @@ contract TicTacToe {
 
     function toggleCurrentPlayer() public {
         _currentPlayer = _currentPlayer == _player1 ? _player2 : _player1;
+        emit CurrentPlayer(_currentPlayer);
     }
 
     function resetBoard() public {
@@ -120,7 +122,7 @@ contract TicTacToe {
         resetBalances();
     }
 
-    function resetBalances() public {
+    function resetBalances() private {
         delete balances[_player1];
         delete balances[_player2];
     }
@@ -141,6 +143,10 @@ contract TicTacToe {
 
     function getBoardEvent() public {
         emit GameBoard(board);
+    }
+
+    function getCurrentPlayerEvent() public {
+        emit CurrentPlayer(_currentPlayer);
     }
 
     /**

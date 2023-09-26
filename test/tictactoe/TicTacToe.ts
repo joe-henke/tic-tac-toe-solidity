@@ -116,13 +116,6 @@ describe("TicTacToe Winning and Tie", function () {
     expect((await this.tictactoe.getBalance()).toString()).to.equal("2");
     await this.tictactoe.connect(this.signers.player1).move(6);
     expect((await this.tictactoe.getBalance()).toString()).to.equal("0");
-    // console.log("--------------");
-    // console.log(await ethers.provider.getBalance(this.signers.player1));
-    // console.log(await ethers.provider.getBalance(this.signers.player2));
-    // console.log("p1", (await this.tictactoe.getBalance(this.signers.player1)).toString());
-    // console.log("p2", (await this.tictactoe.getBalance(this.signers.player2)).toString());
-    // console.log((await this.tictactoe.getBalance(this.signers.player2)).toString());
-    // console.log("--------------");
     expect((await this.tictactoe.getBoard()).toString()).to.equal(BOARD);
   });
 });
@@ -135,4 +128,17 @@ describe("test event emitted", function () {
   });
 });
 
-// [0, 1, 2, 3, 5, 4, 6, 8, 7].forEach(async (tile) => {
+describe("Test Events", function () {
+  deployContract();
+  it("should emit the current player", async function () {
+    await this.tictactoe.getCurrentPlayerEvent();
+    await expect(this.tictactoe.getCurrentPlayerEvent())
+      .to.emit(this.tictactoe, "CurrentPlayer")
+      .withArgs(this.signers.player1.address);
+    await this.tictactoe.toggleCurrentPlayer();
+    await expect(this.tictactoe.getCurrentPlayerEvent())
+      .to.emit(this.tictactoe, "CurrentPlayer")
+      .withArgs(this.signers.player2.address);
+  });
+});
+
