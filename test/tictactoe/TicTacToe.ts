@@ -141,4 +141,3 @@ describe("Test Events", function () {
       .withArgs(this.signers.player2.address);
   });
 });
-

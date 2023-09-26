@@ -11,13 +11,13 @@ contract TicTacToe {
     address payable private _player2;
     address payable private _currentPlayer;
 
-    mapping(address playerAddress => uint amount) public balances;
+    mapping(address player => uint amount) public balances;
 
     /**
      * @dev GameState is emitted after each move and is intended to update the frontend
      * @notice event to report game state: the board, amount of turns, current player, and if there's a win/tie
      */
-    event GameState(uint[9], uint, address, bool);
+    event GameState(uint[9] board, uint, address, bool);
     event GameBoard(uint[9]);
     event CurrentPlayer(address);
 
@@ -25,7 +25,7 @@ contract TicTacToe {
      * @dev modifier to determine if msg.sender is a registered player
      */
     modifier isPlayer() {
-        require((msg.sender == _player1 || msg.sender == _player2), "please join game if there's an available space");
+        require((msg.sender == _player1 || msg.sender == _player2), "please join the game");
         _;
     }
 
@@ -46,7 +46,8 @@ contract TicTacToe {
     }
 
     /**
-     * @dev This method enables the player to deposit a wager. The isPlayer modifier confirms the depositor is a player who has joined the game
+     * @dev This method enables the player to deposit a wager.
+     * The isPlayer modifier confirms the depositor is a player who has joined the game
      * @notice executes a move on the board by the current player
      */
     function deposit() public payable isPlayer {
@@ -54,7 +55,9 @@ contract TicTacToe {
     }
 
     /**
-     * @dev players join the game to register their account address with the game. Players are then assigned a value of 1 or 2 that they use to mark the squares. How this maps to "X" or "O" is dependent on presentation logic.
+     * @dev players join the game to register their account address with the game.
+     * Players are then assigned a value of 1 or 2 that they use to mark the squares.
+     * How this maps to "X" or "O" is dependent on presentation logic.
      * @notice method to enable player to join the game
      */
     function joinGame() public {
@@ -68,8 +71,11 @@ contract TicTacToe {
     }
 
     /**
-     * @dev method to reset the board and all parameters and start a fresh game. Allows for resetting the game on the frontend. This method is called after the second player joins the game.
+     * @dev method to reset the board and all parameters and start a fresh game.
+     * Allows for resetting the game on the frontend.
+     * This method is called after the second player joins the game.
      * @notice method to enable frontend to start game
+     * check for game in progress, could lose track of player balances
      */
     function startGame() public {
         resetBoard();
@@ -78,8 +84,11 @@ contract TicTacToe {
     }
 
     /**
-     * @param _index index of the "board" array. Board can be presented as a 3x3 board, but board is evaluated as an array.
-     * @dev This method is used for determining if the board is in a win or tie state, called after every move. Modifiers require that the board index not be occupied by a value (i.e., it's empty), and that the player executing the move is the current player.
+     * @param _index index of the "board" array.
+     * Board can be presented as a 3x3 board, but board is evaluated as an array.
+     * @dev This method is used for determining if the board is in a win or tie state, called after every move
+     * Modifiers require that the board index not be occupied by a value (i.e., it's empty),
+     * and that the player executing the move is the current player.
      * @notice executes a move on the board by the current player
      */
     function move(uint _index) public squareIsValid(_index) isCurrentPlayer(msg.sender) {
@@ -89,6 +98,8 @@ contract TicTacToe {
         emit GameState(_board, _numTurns, _currentPlayer, winnerOrTie);
         ++_numTurns;
         if (winnerOrTie) {
+            // check effects interactions
+            // (reset should happen before transfer, cache balances to local variable - security practice)
             transferBalanceToWinner(_currentPlayer);
             resetGame();
         }
@@ -100,12 +111,34 @@ contract TicTacToe {
     }
 
     /**
-     * @dev This method is used for determining if the board is in a win or tie state, called after every move
+     * @dev This method is used for determining win or tie state, called after every move
      * @notice Check board for winner or tie
      * @return bool
      */
     function checkWinner() public view returns (bool) {
-        // check rows ---- board indexes [0, 1, 2], [3, 4, 5], [6, 7, 8]
+        if (checkRows()) {
+            return true;
+        }
+        if (checkColumns()) {
+            return true;
+        }
+
+        // check diagonals ---- board indexes [0, 4, 8], [2, 4, 6]
+        if (_board[0] != 0 && _board[0] == _board[4] && _board[0] == _board[8]) {
+            return true;
+        }
+        if (_board[2] != 0 && _board[2] == _board[4] && _board[2] == _board[6]) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @dev This method checks the rows of the board as a 3x3 grid to determine winner
+     * check rows ---- board indexes [0, 1, 2], [3, 4, 5], [6, 7, 8]
+     * @return bool
+     */
+    function checkRows() private view returns (bool) {
         for (uint i = 0; i <= 6; i += 3) {
             if (_board[i] == 0) {
                 continue;
@@ -114,7 +147,16 @@ contract TicTacToe {
                 return true;
             }
         }
-        // check columns ---- board indexes [0, 3, 6], [1, 4, 7], [2, 5, 8]
+        return false;
+    }
+
+    /**
+     * @dev This method checks the columns of the board as a 3x3 grid to determine winner
+     * check columns ---- board indexes [0, 3, 6], [1, 4, 7], [2, 5, 8]
+     * @return bool
+     */
+
+    function checkColumns() private view returns (bool) {
         for (uint i = 0; i <= 3; i++) {
             if (_board[i] == 0) {
                 continue;
@@ -122,13 +164,6 @@ contract TicTacToe {
             if (_board[i] == _board[i + 3] && _board[i] == _board[i + 6]) {
                 return true;
             }
-        }
-        // check diagonals ---- board indexes [0, 4, 8], [2, 4, 6]
-        if (_board[0] != 0 && _board[0] == _board[4] && _board[0] == _board[8]) {
-            return true;
-        }
-        if (_board[2] != 0 && _board[2] == _board[4] && _board[2] == _board[6]) {
-            return true;
         }
         return false;
     }
@@ -160,8 +195,8 @@ contract TicTacToe {
 
     function resetGame() public {
         resetBoard();
-        resetPlayers();
         resetBalances();
+        resetPlayers();
     }
 
     function resetBalances() private {
