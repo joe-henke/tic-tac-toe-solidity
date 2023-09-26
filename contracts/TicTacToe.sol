@@ -13,17 +13,20 @@ contract TicTacToe {
 
     mapping(address playerAddress => uint amount) public balances;
 
+    event GameState(uint[9], uint, address);
+    event GameBoard(uint[9]);
+
     modifier isPlayer() {
-        require((msg.sender == _player1 || msg.sender == _player2), "not a player in this game");
+        require((msg.sender == _player1 || msg.sender == _player2), "please join game if there's an available space");
         _;
     }
 
     modifier squareIsValid(uint _index) {
-        require((_index < board.length && board[_index] == 0), "not valid square");
+        require((board[_index] == 0), "not valid square");
         _;
     }
 
-    function deposit() public payable {
+    function deposit() public payable isPlayer {
         balances[msg.sender] += msg.value;
     }
 
@@ -92,7 +95,7 @@ contract TicTacToe {
     }
 
     function resetBoard() public {
-        board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        delete board;
     }
 
     function resetPlayers() public {
@@ -134,6 +137,10 @@ contract TicTacToe {
 
     function getBoard() public view returns (uint[9] memory) {
         return board;
+    }
+
+    function getBoardEvent() public {
+        emit GameBoard(board);
     }
 
     /**

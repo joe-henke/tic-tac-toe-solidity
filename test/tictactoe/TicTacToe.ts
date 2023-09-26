@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import type { Signers } from "../tictactoeTypes";
 import { deployTicTacToeFixture } from "./TicTacToe.fixture";
-import { BOARD, MOVE1, MOVE2, MOVE3, MOVE4, ZERO_ADDRESS } from "./TicTacToeConstants";
+import { BOARD, BOARD_ARRAY, MOVE1, MOVE2, MOVE3, MOVE4, ZERO_ADDRESS } from "./TicTacToeConstants";
 
 function deployContract() {
   before(async function () {
@@ -73,28 +73,24 @@ describe("TicTacToe Start", function () {
 
 describe("TicTacToe Movement", function () {
   deployContract();
-  it("should enable players to set squares on the board", async function () {
+  beforeEach(async function () {
     await this.tictactoe.startGame();
     await this.tictactoe.connect(this.signers.player1).move(0);
+  });
+  it("should enable players to set squares on the board", async function () {
     expect((await this.tictactoe.getBoard()).toString()).to.equal(MOVE1);
   });
 
   it("should assign current player to player2 after player1 move", async function () {
-    await this.tictactoe.startGame();
-    await this.tictactoe.connect(this.signers.player1).move(0);
     expect(await this.tictactoe.getCurrentPlayer()).to.equal(this.signers.player2.address);
   });
   it("should keep a running total or turns", async function () {
-    await this.tictactoe.startGame();
-    await this.tictactoe.connect(this.signers.player1).move(0);
     await this.tictactoe.connect(this.signers.player2).move(1);
     await this.tictactoe.connect(this.signers.player1).move(2);
     await this.tictactoe.connect(this.signers.player2).move(3);
     expect(await this.tictactoe.getNumberOfTurns()).to.equal("5");
   });
   it("should update the board with each move", async function () {
-    await this.tictactoe.startGame();
-    await this.tictactoe.connect(this.signers.player1).move(0);
     expect((await this.tictactoe.getBoard()).toString()).to.equal(MOVE1);
     await this.tictactoe.connect(this.signers.player2).move(1);
     expect((await this.tictactoe.getBoard()).toString()).to.equal(MOVE2);
@@ -128,6 +124,14 @@ describe("TicTacToe Winning and Tie", function () {
     // console.log((await this.tictactoe.getBalance(this.signers.player2)).toString());
     // console.log("--------------");
     expect((await this.tictactoe.getBoard()).toString()).to.equal(BOARD);
+  });
+});
+
+describe("test event emitted", function () {
+  deployContract();
+  it("should emit game board", async function () {
+    await this.tictactoe.getBoardEvent();
+    await expect(this.tictactoe.getBoardEvent()).to.emit(this.tictactoe, "GameBoard").withArgs(BOARD_ARRAY);
   });
 });
 
