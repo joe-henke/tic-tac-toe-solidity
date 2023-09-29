@@ -35,6 +35,7 @@ const chainIds = {
   "polygon-mainnet": 137,
   "polygon-mumbai": 80001,
   sepolia: 11155111,
+  goerli: 5,
 };
 
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
@@ -47,7 +48,7 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       jsonRpcUrl = "https://bsc-dataseed1.binance.org";
       break;
     default:
-      jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
+      jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + "436713e31c624bc4b4618b56e75a715a";
   }
   return {
     accounts: {
@@ -96,6 +97,16 @@ const config: HardhatUserConfig = {
       },
       chainId: chainIds.ganache,
       url: "http://localhost:8545",
+    },
+    goerli: {
+      url: "https://goerli.infura.io/v3/436713e31c624bc4b4618b56e75a715a",
+      accounts: {
+        mnemonic,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 20,
+      },
+      chainId: chainIds.goerli,
     },
     arbitrum: getChainConfig("arbitrum-mainnet"),
     avalanche: getChainConfig("avalanche"),
